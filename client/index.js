@@ -18,6 +18,9 @@ $( document ).ready(function() {
       console.log(snacks_str);
       $.get( 'attu.cs.washington.edu:50000', { name: name, location : loct,
                                                sncaks: snacks_str
-                                              });
+      }, function(data) {
+        var code = data.code;
+        // do something to display the code
+      });
     });
 });
