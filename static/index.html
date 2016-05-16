@@ -51,88 +51,89 @@
       <div class="jumbotron">
         <h1>Snack on Demand</h1>
         <p class="lead">Have you ever been sitting there and thought, &quot;Boy would I love a snack right now! I just wish I could make myself get up!&quot; Well do we have the answer for you! Order a snack NOW!</p>
-        <p><a class="btn btn-lg btn-success" href="#order_now_jump" role="button">Begin Order</a></p>
+        <p><a class="btn btn-lg btn-success" role="button">Begin Order</a></p>
       </div>
 
-      <div class="info-name" id="order_now_jump">
-        <h3>Name:</h3>
-        <input type="text" name="clientname" value="" id="clientname">
-      </div>
-
-      <div class="info-location">
-        <h3>Snack Drop of Point:</h3>
-        <select name="location" id="location">
-          <option value="cse002" selected>CSE 002</option>
-          <option value="cse003">CSE 003</option>
-          <option value="cse006">CSE 006</option>
-          <option value="cse022">CSE 022</option>
-        </select>
-
-      <div class="row marketing">
-        <div class="col-lg-6">
-          <h4>Snickers&nbsp;<input id="snickers" type="checkbox" name="snack" value="Snickers">&nbsp;
-            <select name="snicker_amount" id="snicker_amount">
-              <option value="0" selected>0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </h4>
-          <p>Order this! It is the best!</p>
-
-
-          <h4>Cheetos&nbsp;<input id="cheetos" type="checkbox" name="snack" value="Cheetos">&nbsp;
-            <select name="cheetos_amount">
-              <option value="0" selected="selecte">0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </h4>
-          <p>No, this is definitely the best!</p>
-
-          <h4>m&amp;m&#39;s&nbsp;<input type="checkbox" name="snack" value="mandms">&nbsp;
-            <select name="mandms_amount">
-              <option value="0" selected>0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </h4>
-          <p>Just kidding, this is the best!</p>
+      <form action="unimate.cs.washington.edu:59595/order" method="GET">
+        <div class="info-name" id="order_now_jump">
+          <h3>Name:</h3>
+          <input type="text" name="clientname" value="" id="clientname">
         </div>
 
-        <div class="col-lg-6">
-          <h4>Twix&nbsp;<input type="checkbox" name="snack" value="Twix">&nbsp;
-            <select name="twix_amount">
-              <option value="0" selected>0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </h4>
-          <p>You know you want this!</p>
+        <div class="info-location">
+          <h3>Snack Drop of Point:</h3>
+          <select name="location" id="location">
+            <option value="cse002" selected>CSE 002</option>
+            <option value="cse003">CSE 003</option>
+            <option value="cse006">CSE 006</option>
+            <option value="cse022">CSE 022</option>
+          </select>
 
-          <h4>Doritos&nbsp;<input type="checkbox" name="snack" value="Doritos">&nbsp;
-            <select name="doritos_amount">
-              <option value="0" selected>0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </h4>
-          <p>Order! Order this now!</p>
+        <div class="row marketing">
+          <div class="col-lg-6">
+            <h4>Snickers&nbsp;<input id="snickers" type="checkbox" name="snack" value="Snickers">&nbsp;
+              <select name="snicker_amount" id="snicker_amount">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </h4>
+            <p>Order this! It is the best!</p>
 
-          <h4>Skittles&nbsp;<input type="checkbox" name="snack" value="Skittles">&nbsp;
-            <select name="skittles_amount">
-              <option value="0" selected>0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </h4>
-          <p>Oh pick me!</p>
+
+            <h4>Cheetos&nbsp;<input id="cheetos" type="checkbox" name="snack" value="Cheetos">&nbsp;
+              <select name="cheetos_amount">
+                <option value="0" selected="selecte">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </h4>
+            <p>No, this is definitely the best!</p>
+
+            <h4>m&amp;m&#39;s&nbsp;<input type="checkbox" name="snack" value="mandms">&nbsp;
+              <select name="mandms_amount">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </h4>
+            <p>Just kidding, this is the best!</p>
+          </div>
+
+          <div class="col-lg-6">
+            <h4>Twix&nbsp;<input type="checkbox" name="snack" value="Twix">&nbsp;
+              <select name="twix_amount">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </h4>
+            <p>You know you want this!</p>
+
+            <h4>Doritos&nbsp;<input type="checkbox" name="snack" value="Doritos">&nbsp;
+              <select name="doritos_amount">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </h4>
+            <p>Order! Order this now!</p>
+
+            <h4>Skittles&nbsp;<input type="checkbox" name="snack" value="Skittles">&nbsp;
+              <select name="skittles_amount">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </h4>
+            <p>Oh pick me!</p>
+          </div>
         </div>
-      </div>
 
-      <div id="order-submission">
-        <button type="button" id="place-order">Place Order!</button>
-
-      </div>
+        <div id="order-submission">
+          <button type="button" id="place-order">Place Order!</button>
+        </div>
+      </form>
 
       <footer class="footer">
         <p>&copy; 2016 Snack-A-Saurus, Inc.</p>

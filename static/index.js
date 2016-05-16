@@ -29,16 +29,16 @@ $( document ).ready(function() {
       //    alert("");
       //});
 
-      $.get('localhost:59595/order?name=omar&location=003', function(data) {
-          alert("");
-      });
+      //$.get('http://unimate.cs.washington.edu:59595', function(data) {
+      //    alert("");
+      //});
 
       //$.get( 'attu4.cs.washington.edu:59595', { name: name, location : loct });
                                                //sncaks: snacks_str
-      //var xhttp = new XMLHttpRequest();
-      //xhttp.open("GET", "http://127.0.0.1:59595", true);
-      //xhttp.setRequestHeader("Access-Control-Allow-Origin", "http://127.0.0.1:59595");
-      //xhttp.send();
+      var xhttp = new XMLHttpRequest();
+      xhttp.open("GET", "http://unimate.cs.washington.edu:59595", true);
+      xhttp.setRequestHeader("Access-Control-Allow-Origin", "http://unimate.cs.washington.edu:59595");
+      xhttp.send();
 
     });
 });
