@@ -8,12 +8,14 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+    <link rel="icon" href="./favicon.ico">
 
-    <title>Narrow Jumbotron Template for Bootstrap</title>
+    <title>Snack-A-Saurus</title>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+    <script src="index.js"></script>
     <!-- Bootstrap core CSS -->
-    <link href="bootstrap-3.3.6-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <!--<link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">-->
@@ -43,47 +45,102 @@
             <li role="presentation"><a href="#">Contact</a></li>
           </ul>
         </nav>
-        <h3 class="text-muted">Project name</h3>
+        <h3 class="text-muted">Snack-A-Saurus</h3>
       </div>
 
       <div class="jumbotron">
-        <h1>Jumbotron heading</h1>
-        <p class="lead">Cras justo odio, dapibus ac facilisis in, egestas eget quam. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-        <p><a class="btn btn-lg btn-success" href="#" role="button">Sign up today</a></p>
+        <h1>Snack on Demand</h1>
+        <p class="lead">Have you ever been sitting there and thought, &quot;Boy would I love a snack right now! I just wish I could make myself get up!&quot; Well do we have the answer for you! Order a snack NOW!</p>
+        <p><a class="btn btn-lg btn-success" href="#order_now_jump" role="button">Begin Order</a></p>
       </div>
+
+      <div class="info-name" id="order_now_jump">
+        <h3>Name:</h3>
+        <input type="text" name="clientname" value="" id="clientname">
+      </div>
+
+      <div class="info-location">
+        <h3>Snack Drop of Point:</h3>
+        <select name="location" id="location">
+          <option value="cse002" selected>CSE 002</option>
+          <option value="cse003">CSE 003</option>
+          <option value="cse006">CSE 006</option>
+          <option value="cse022">CSE 022</option>
+        </select>
 
       <div class="row marketing">
         <div class="col-lg-6">
-          <h4>Subheading</h4>
-          <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
+          <h4>Snickers&nbsp;<input id="snickers" type="checkbox" name="snack" value="Snickers">&nbsp;
+            <select name="snicker_amount" id="snicker_amount">
+              <option value="0" selected>0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </h4>
+          <p>Order this! It is the best!</p>
 
-          <h4>Subheading</h4>
-          <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
 
-          <h4>Subheading</h4>
-          <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+          <h4>Cheetos&nbsp;<input id="cheetos" type="checkbox" name="snack" value="Cheetos">&nbsp;
+            <select name="cheetos_amount">
+              <option value="0" selected="selecte">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </h4>
+          <p>No, this is definitely the best!</p>
+
+          <h4>m&amp;m&#39;s&nbsp;<input type="checkbox" name="snack" value="mandms">&nbsp;
+            <select name="mandms_amount">
+              <option value="0" selected>0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </h4>
+          <p>Just kidding, this is the best!</p>
         </div>
 
         <div class="col-lg-6">
-          <h4>Subheading</h4>
-          <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
+          <h4>Twix&nbsp;<input type="checkbox" name="snack" value="Twix">&nbsp;
+            <select name="twix_amount">
+              <option value="0" selected>0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </h4>
+          <p>You know you want this!</p>
 
-          <h4>Subheading</h4>
-          <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
+          <h4>Doritos&nbsp;<input type="checkbox" name="snack" value="Doritos">&nbsp;
+            <select name="doritos_amount">
+              <option value="0" selected>0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </h4>
+          <p>Order! Order this now!</p>
 
-          <h4>Subheading</h4>
-          <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+          <h4>Skittles&nbsp;<input type="checkbox" name="snack" value="Skittles">&nbsp;
+            <select name="skittles_amount">
+              <option value="0" selected>0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </h4>
+          <p>Oh pick me!</p>
         </div>
       </div>
 
+      <div id="order-submission">
+        <button type="button" id="place-order">Place Order!</button>
+
+      </div>
+
       <footer class="footer">
-        <p>&copy; 2015 Company, Inc.</p>
+        <p>&copy; 2016 Snack-A-Saurus, Inc.</p>
       </footer>
 
     </div> <!-- /container -->
 
-
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+    <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
   </body>
 </html>
