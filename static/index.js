@@ -35,15 +35,18 @@ $( document ).ready(function() {
 
       //$.get( 'attu4.cs.washington.edu:59595', { name: name, location : loct });
                                                //sncaks: snacks_str
+      var code = Math.floor(Math.random()*9000) + 1000;
+
       var xhttp = new XMLHttpRequest();
-      xhttp.open("GET", "http://unimate.cs.washington.edu:59595/order?name=" + name + "&location=" + loct, true);
+      xhttp.open("GET", "http://unimate.cs.washington.edu:59595/order?name=" + name + "&location=" + loct + "&code=" + code, true);
       xhttp.setRequestHeader("Access-Control-Allow-Origin", "http://unimate.cs.washington.edu:59595");
       xhttp.send();
       xhttp.onload = function(event)
       {
         var json = xhttp.responseText; // Response, yay!
         console.log(json)
-        document.getElementById("body").innerHTML = json
+        document.getElementById("body").innerHTML = " " + json
+        alert("Your code is " + code);
       }
     });
 });
