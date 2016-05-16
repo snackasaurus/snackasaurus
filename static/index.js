@@ -36,7 +36,7 @@ $( document ).ready(function() {
       //$.get( 'attu4.cs.washington.edu:59595', { name: name, location : loct });
                                                //sncaks: snacks_str
       var xhttp = new XMLHttpRequest();
-      xhttp.open("GET", "http://unimate.cs.washington.edu:59595/order?name=" + name + "&location=" + location, true);
+      xhttp.open("GET", "http://unimate.cs.washington.edu:59595/order?name=" + name + "&location=" + loct, true);
       xhttp.setRequestHeader("Access-Control-Allow-Origin", "http://unimate.cs.washington.edu:59595");
       xhttp.send();
 
