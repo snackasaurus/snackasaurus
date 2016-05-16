@@ -28,4 +28,4 @@ def login():
 
 	return name + " " + location
 if __name__ == '__main__':
-  app.run(port=int(59595))
+  app.run(host="unimate.cs.washington.edu", port=int(59595))

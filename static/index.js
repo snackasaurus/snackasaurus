@@ -25,7 +25,11 @@ $( document ).ready(function() {
       console.log(name);
       console.log(loct);
       //console.log(snacks_str);
-      $.get( 'localhost:59595/order', { name: name, location : loct }).done(function (data) {
+      //$.get('localhost:59595/order', { name: name, location : loct }).done(function (data) {
+      //    alert("");
+      //});
+
+      $.get('localhost:59595/order?name=omar&location=003', function(data) {
           alert("");
       });
 
