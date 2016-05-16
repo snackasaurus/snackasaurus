@@ -43,6 +43,7 @@ $( document ).ready(function() {
       {
         var json = xhttp.responseText; // Response, yay!
         console.log(json)
+        document.getElementById("body").innerHTML = json
       }
     });
 });
