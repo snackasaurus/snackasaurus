@@ -39,6 +39,10 @@ $( document ).ready(function() {
       xhttp.open("GET", "http://unimate.cs.washington.edu:59595/order?name=" + name + "&location=" + loct, true);
       xhttp.setRequestHeader("Access-Control-Allow-Origin", "http://unimate.cs.washington.edu:59595");
       xhttp.send();
-
+      xhttp.onload = function(event)
+      {
+        var json = xhttp.responseText; // Response, yay!
+        console.log(json)
+      }
     });
 });
