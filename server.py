@@ -4,11 +4,13 @@
 #
 
 from flask import Flask, request, redirect, url_for, send_from_directory
+from flask.ext.cors import CORS, cross_origin
 
 # Setup Flask app.
 app = Flask(__name__)
 app.debug = True
-
+cors = CORS(app, resources={r"/order": {"origins": "*"}})
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Routes
 @app.route('/')
@@ -21,6 +23,7 @@ def static_proxy(path):
   return app.send_static_file(path)
 
 @app.route('/order', methods=['GET', 'POST'])
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
 def login():
     if request.method == 'GET':
         name = request.args.get('name', '')
