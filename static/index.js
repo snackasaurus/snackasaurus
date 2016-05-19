@@ -38,8 +38,6 @@ $( document ).ready(function() {
         snacks_str += "&skittles=" + $( '#skittles_amount option:selected' ).text();
       }
 
-      alert(snacks_str)
-
       //var snacks = {snack1 : 0, snack2 : 0,
        //             snack3 : 0, snack4 : 0,
        //             snack5 : 0, snack6 : 0};
