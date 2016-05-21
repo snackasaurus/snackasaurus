@@ -6,7 +6,10 @@
 from flask import Flask, request, redirect, url_for, send_from_directory
 from flask.ext.cors import CORS, cross_origin
 
+import common
 from Queue import Queue
+from socket import socket, AF_INET, SOCK_STREAM
+fromt struct import pack
 
 # Setup Flask app.
 app = Flask(__name__)
@@ -22,7 +25,10 @@ all_snacks['twix'] = 3
 all_snacks['doritos'] = 4
 all_snacks['skittles'] = 5
 
+SNACK_NAMES = ['snickers', 'cheetos', 'mandms', 'twix', 'doritos', 'skittles']
+
 jobQueue = Queue()
+
 
 class Job:
     def __init__(self, name, location, code):
@@ -30,10 +36,26 @@ class Job:
         self.name = name
         self.location = location
         self.code = code
+        self.poll_socket = socket(AF_INET, SOCK_STREAM)
+        self.poll_socket.connect(('localhost', POLL_PORT))
 
-    def addSnack(self, id, quantity):
+    def addSnack(self, snack_name, quantity):
+        # add the snack IFF the quantity is at least one
         if quantity > 0:
-            self.snacks[id] = quantity
+            self.snacks[snack_name] = quantity
+
+    def send_job(self):
+        # send the job to the node
+        encoded_data = self.encode_data()
+        self.poll_socket.sendall(encoded_data)
+
+    def encode_data(self):
+        # encode all of the data to send
+        result = pack(common.CODE_NAME_LOC_NUM_ENCODING, self.code, self.name, self.location, len(self.snacks))
+        for snack_name in self.snacks:
+            snack_packed_data = pack(SNACK_ENCODING, snack_name, self.snacks[snack_name])
+            result = common.combine_structs(result, snack_packed_data)
+        return result
 
 # Routes
 @app.route('/')
@@ -55,24 +77,34 @@ def login():
         location = request.args.get('location', '')
         code = int(request.args.get('code', ''))
 
-        qsnickers = request.args.get('snickers', '0')
-        qcheetos = request.args.get('cheetos', '0')
-        qmandms = request.args.get('mandms', '0')
-        qtwix = request.args.get('twix', '0')
-        qdoritos = request.args.get('doritos', '0')
-        qskittles = request.args.get('skittles', '0')
-
         print name
         print location
         print str(code)
 
+        # create a new job
         job = Job(name, location, code)
-        job.addSnack(all_snacks['snickers'], qsnickers)
-        job.addSnack(all_snacks['cheetos'], qcheetos)
-        job.addSnack(all_snacks['mandms'], qmandms)
-        job.addSnack(all_snacks['twix'], qtwix)
-        job.addSnack(all_snacks['doritos'], qdoritos)
-        job.addSnack(all_snacks['skittles'], qskittles)
+
+        # get any snacks that the user has selected, and put it into the job
+        for snack_name in SNACK_NAMES:
+            quantity = int(request.args.get(snack_name, ''))
+            job.addSnack(snack_name, quantity)
+
+        # send the job to the poll
+        job.send_job()
+
+        #qsnickers = int(request.args.get('snickers', '0'))
+        #qcheetos = int(request.args.get('cheetos', '0'))
+        #qmandms = int(request.args.get('mandms', '0'))
+        #qtwix = int(request.args.get('twix', '0'))
+        #qdoritos = int(request.args.get('doritos', '0'))
+        #qskittles = int(request.args.get('skittles', '0'))
+
+        #job.addSnack(all_snacks['snickers'], qsnickers)
+        #job.addSnack(all_snacks['cheetos'], qcheetos)
+        #job.addSnack(all_snacks['mandms'], qmandms)
+        #job.addSnack(all_snacks['twix'], qtwix)
+        #job.addSnack(all_snacks['doritos'], qdoritos)
+        #job.addSnack(all_snacks['skittles'], qskittles)
 
         jobQueue.put(job)
         print str(jobQueue.qsize()) + " length"
