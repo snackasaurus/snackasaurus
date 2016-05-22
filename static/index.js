@@ -38,6 +38,8 @@ $( document ).ready(function() {
         snacks_str += "&skittles=" + $( '#skittles_amount option:selected' ).text();
       }
 
+      alert(snacks_str);
+
       //var snacks = {snack1 : 0, snack2 : 0,
        //             snack3 : 0, snack4 : 0,
        //             snack5 : 0, snack6 : 0};
@@ -76,3 +78,16 @@ $( document ).ready(function() {
       }
     });
 });
+
+
+
+// testing things out
+function handleCheckbox(cb, amount_id) {
+  if (cb.checked) {
+    document.getElementById(amount_id).disabled = false
+  } else {
+    document.getElementById(amount_id).disabled = true
+    document.getElementById(amount_id).value = 0
+  }
+}
+
