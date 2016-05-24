@@ -38,6 +38,13 @@ $( document ).ready(function() {
         snacks_str += "&skittles=" + $( '#skittles_amount option:selected' ).text();
       }
 
+      var deliver = snickers || cheetos || mandms || twix || doritos || skittles
+
+      if (!deliver) {
+        alert("No snacks were selected!");
+        return;
+      }
+
       //var snacks = {snack1 : 0, snack2 : 0,
        //             snack3 : 0, snack4 : 0,
        //             snack5 : 0, snack6 : 0};
@@ -69,10 +76,10 @@ $( document ).ready(function() {
       xhttp.send();
       xhttp.onload = function(event)
       {
-        var json = xhttp.responseText; // Response, yay!
+        /*var json = xhttp.responseText; // Response, yay!
         console.log(json)
-        document.getElementById("body").innerHTML = " " + json
-        alert("Your code is " + code);
+        document.getElementById("body").innerHTML = " " + json*/
+        alert("Your snack is on it's way, " + name + "!  Code: " + code);
       }
     });
 });

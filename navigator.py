@@ -1,17 +1,3 @@
-#!/usr/bin/python
-
-import common
-import server
-import time
-from threading import Thread
-from socket import socket, AF_INET, SOCK_STREAM
-from struct import unpack, calcsize
-import sys
-from Queue import Empty
-
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 #!/usr/bin/env python
 
 # ros imports
@@ -93,51 +79,6 @@ def goto_marker(sac, listener, name):
 def get_distance(x1, y1, x2, y2):
     return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
-
-def worker():
-    listening_socket = socket(AF_INET, SOCK_STREAM)
-    listening_socket.bind(('0.0.0.0', common.POLL_PORT))
-    listening_socket.listen(5)
-
-    try:
-        while True:
-            client_socket, client_addr = listening_socket.accept()
-            print '[GOOD NEWS] Data received!'
-            recv_data = client_socket.recv(common.BUF_SIZE)
-
-            # get the code, name, location, and number of snacks
-            code_name_loc_num, rest_snacks = recv_data[:common.HEADER_SIZE], recv_data[common.HEADER_SIZE:]
-            secret_code, name, location, num_snacks = unpack(common.CODE_NAME_LOC_NUM_ENCODING, code_name_loc_num)
-
-            # strip out any nulls in the string (due to how we pack the data)
-            name = name.replace('\0', '')
-            location = location.replace('\0', '')
-
-
-            print '  [DATA-RECEIVED]  secret_code: %d, name: %s, location:%s, num_snacks: %d' % \
-                  (secret_code, name, location, num_snacks)
-
-            for i in range(0, num_snacks):
-                single_snack, rest_snacks = rest_snacks[:common.SNACK_SIZE], rest_snacks[common.SNACK_SIZE:]
-                snack_name, snack_amount = unpack(common.SNACK_ENCODING, single_snack)
-
-                # strip out any nulls in the snack (same reason as the name/location one)
-                snack_name = snack_name.replace('\0', '')
-                print '    [SNACK-DATA]  snack_name: %s, snack_amount: %d' % (snack_name, snack_amount)
-
-
-            goto_marker(sac, listener, location)
-
-            #print "waiting for job"
-            #server.get_job()
-            #print "got job"
-
-            #time.sleep(5)
-            #print "job was done"
-    except KeyboardInterrupt:
-        exit()
-
-
 if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
 
@@ -163,7 +104,6 @@ if __name__=="__main__":
     control_speed = 0
     control_turn = 0
 
-    worker()
-
+    goto_marker(sac, listener, "002")
 
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)

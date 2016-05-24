@@ -41,8 +41,8 @@
         <nav>
           <ul class="nav nav-pills pull-right">
             <li role="presentation" class="active"><a href="#">Home</a></li>
-            <li role="presentation"><a href="#">About</a></li>
-            <li role="presentation"><a href="#">Contact</a></li>
+            <!--<li role="presentation"><a href="#">About</a></li>
+            <li role="presentation"><a href="#">Contact</a></li>-->
           </ul>
         </nav>
         <h3 class="text-muted">Snack-A-Saurus</h3>
@@ -51,17 +51,16 @@
       <div class="jumbotron">
         <h1>Snack on Demand</h1>
         <p class="lead">Have you ever been sitting there and thought, &quot;Boy would I love a snack right now! I just wish I could make myself get up!&quot; Well do we have the answer for you! Order a snack NOW!</p>
-        <p><a class="btn btn-lg btn-success" role="button">Begin Order</a></p>
       </div>
 
-      <form action="unimate.cs.washington.edu:59595/order" method="GET">
+    <form action="unimate.cs.washington.edu:59595/order" method="GET">
         <div class="info-name" id="order_now_jump">
-          <h3>Name:</h3>
+          <h3>CSEID:</h3>
           <input type="text" name="clientname" value="" id="clientname">
         </div>
 
         <div class="info-location">
-          <h3>Snack Drop of Point:</h3>
+          <h3>Snack Dropoff Point:</h3>
           <select name="location" id="location">
             <option value="cse002" selected>CSE002</option>
             <option value="cse003">CSE003</option>
@@ -133,6 +132,7 @@
         <div id="order-submission">
           <button type="button" id="place-order">Place Order!</button>
         </div>
+        <br/>
       </form>
 
       <footer class="footer">
