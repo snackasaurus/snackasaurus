@@ -31,9 +31,6 @@ all_snacks['skittles'] = 5
 
 SNACK_NAMES = ['snickers', 'cheetos', 'mandms', 'twix', 'doritos', 'skittles']
 
-jobQueue = Queue()
-
-
 class Job:
     def __init__(self, name, location, code):
         self.snacks = {}
@@ -107,22 +104,6 @@ def login():
 
         # send the job to the poll
         job.send_job()
-
-        #qsnickers = int(request.args.get('snickers', '0'))
-        #qcheetos = int(request.args.get('cheetos', '0'))
-        #qmandms = int(request.args.get('mandms', '0'))
-        #qtwix = int(request.args.get('twix', '0'))
-        #qdoritos = int(request.args.get('doritos', '0'))
-        #qskittles = int(request.args.get('skittles', '0'))
-
-        #job.addSnack(all_snacks['snickers'], qsnickers)
-        #job.addSnack(all_snacks['cheetos'], qcheetos)
-        #job.addSnack(all_snacks['mandms'], qmandms)
-        #job.addSnack(all_snacks['twix'], qtwix)
-        #job.addSnack(all_snacks['doritos'], qdoritos)
-        #job.addSnack(all_snacks['skittles'], qskittles)
-
-        print str(jobQueue.qsize()) + " length"
 
 	return "<b>" + name + "</b> " + location
 

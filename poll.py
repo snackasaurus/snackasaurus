@@ -7,12 +7,10 @@ from threading import Thread
 from socket import socket, AF_INET, SOCK_STREAM
 from struct import unpack, calcsize
 import sys
-from Queue import Empty
+from Queue import Queue, Empty
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
-
-#!/usr/bin/env python
 
 # ros imports
 import rospy
@@ -27,11 +25,16 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 # python imports
 import sys, select, termios, tty, math, time, os, csv
 
+# flags
+TESTING = True
+
 # global vars
 speed = .2
 turn = 1
 marker_id = 0
 markers = {}
+
+jobQueue = Queue()
 
 # read positions from file
 def read_markers():
@@ -125,8 +128,7 @@ def worker():
                 snack_name = snack_name.replace('\0', '')
                 print '    [SNACK-DATA]  snack_name: %s, snack_amount: %d' % (snack_name, snack_amount)
 
-
-            goto_marker(sac, listener, location)
+            jobQueue.put(location)
 
             #print "waiting for job"
             #server.get_job()
@@ -137,21 +139,31 @@ def worker():
     except KeyboardInterrupt:
         exit()
 
+def dispatchJobs():
+    global jobQueue
+    while (1):
+        if not jobQueue.empty():
+            location = jobQueue.get(True)
+            print "doing job"
+            time.sleep(15)
+            print "done"
+            #goto_marker(sac, listener, location)
 
 if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
 
-    rospy.init_node('navigator')
-    pub = rospy.Publisher('~cmd_vel', Twist, queue_size=5)
-    marker_publisher = rospy.Publisher('visualization_marker', Marker)
-    sac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-    sac.wait_for_server(rospy.Duration(5))
+    if not TESTING:
+        rospy.init_node('navigator')
+        pub = rospy.Publisher('~cmd_vel', Twist, queue_size=5)
+        marker_publisher = rospy.Publisher('visualization_marker', Marker)
+        sac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+        sac.wait_for_server(rospy.Duration(5))
 
-    listener = tf.TransformListener()
-    listener.waitForTransform('/base_link', '/map', rospy.Time(0), rospy.Duration(4.0))
-    (trans,rot) = listener.lookupTransform('/base_link', '/map', rospy.Time(0))
+        listener = tf.TransformListener()
+        listener.waitForTransform('/base_link', '/map', rospy.Time(0), rospy.Duration(100000.0))
+        (trans,rot) = listener.lookupTransform('/base_link', '/map', rospy.Time(0))
 
-    read_markers()
+        read_markers()
 
     x = 0
     th = 0
@@ -163,7 +175,11 @@ if __name__=="__main__":
     control_speed = 0
     control_turn = 0
 
+    t = Thread(target=dispatchJobs, args=())
+    t.daemon = True
+    t.start()
+    print "started dispatcher, lisening to job requests"
     worker()
-
+    print "ready to receive requests"
 
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
