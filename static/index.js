@@ -83,3 +83,16 @@ $( document ).ready(function() {
       }
     });
 });
+
+
+
+// testing things out
+function handleCheckbox(cb, amount_id) {
+  if (cb.checked) {
+    document.getElementById(amount_id).disabled = false
+  } else {
+    document.getElementById(amount_id).disabled = true
+    document.getElementById(amount_id).value = 0
+  }
+}
+

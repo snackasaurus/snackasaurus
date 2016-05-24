@@ -70,8 +70,8 @@
 
         <div class="row marketing">
           <div class="col-lg-6">
-            <h4>Snickers&nbsp;<input id="snickers" type="checkbox" name="snack" value="Snickers">&nbsp;
-              <select name="snicker_amount" id="snicker_amount">
+            <h4>Snickers&nbsp;<input id="snickers" onclick="handleCheckbox(this, 'snicker_amount')" type="checkbox" name="snack" value="Snickers">&nbsp;
+              <select name="snicker_amount" id="snicker_amount" disabled=true>
                 <option value="0" selected>0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -80,8 +80,8 @@
             <p>Order this! It is the best!</p>
 
 
-            <h4>Cheetos&nbsp;<input id="cheetos" type="checkbox" name="snack" value="Cheetos">&nbsp;
-              <select name="cheetos_amount" id="cheetos_amount">
+            <h4>Cheetos&nbsp;<input id="cheetos" onclick="handleCheckbox(this, 'cheetos_amount')" type="checkbox" name="snack" value="Cheetos">&nbsp;
+              <select name="cheetos_amount" id="cheetos_amount" disabled=true>
                 <option value="0" selected="selecte">0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -89,8 +89,8 @@
             </h4>
             <p>No, this is definitely the best!</p>
 
-            <h4>m&amp;m&#39;s&nbsp;<input id="mandms" type="checkbox" name="snack" value="mandms">&nbsp;
-              <select name="mandms_amount" id="mandms_amount">
+            <h4>m&amp;m&#39;s&nbsp;<input id="mandms" onclick="handleCheckbox(this, 'mandms_amount')" type="checkbox" name="snack" value="mandms">&nbsp;
+              <select name="mandms_amount" id="mandms_amount" disabled=true>
                 <option value="0" selected>0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -100,8 +100,8 @@
           </div>
 
           <div class="col-lg-6">
-            <h4>Twix&nbsp;<input id="twix" type="checkbox" name="snack" value="Twix">&nbsp;
-              <select name="twix_amount" id="twix_amount">
+            <h4>Twix&nbsp;<input id="twix" onclick="handleCheckbox(this, 'twix_amount')" type="checkbox" name="snack" value="Twix">&nbsp;
+              <select name="twix_amount" id="twix_amount" disabled=true>
                 <option value="0" selected>0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -109,8 +109,8 @@
             </h4>
             <p>You know you want this!</p>
 
-            <h4>Doritos&nbsp;<input id="doritos" type="checkbox" name="snack" value="Doritos">&nbsp;
-              <select name="doritos_amount" id="doritos_amount">
+            <h4>Doritos&nbsp;<input id="doritos" onclick="handleCheckbox(this, 'doritos_amount')" type="checkbox" name="snack" value="Doritos">&nbsp;
+              <select name="doritos_amount" id="doritos_amount" disabled=true>
                 <option value="0" selected>0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -118,8 +118,8 @@
             </h4>
             <p>Order! Order this now!</p>
 
-            <h4>Skittles&nbsp;<input id="skittles" type="checkbox" name="snack" value="Skittles">&nbsp;
-              <select name="skittles_amount" id="skittles_amount">
+            <h4>Skittles&nbsp;<input id="skittles" onclick="handleCheckbox(this, 'skittles_amount')" type="checkbox" name="snack" value="Skittles">&nbsp;
+              <select name="skittles_amount" id="skittles_amount" disabled=true>
                 <option value="0" selected>0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
