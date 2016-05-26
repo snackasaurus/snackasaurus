@@ -77,20 +77,32 @@ def goto_marker(sac, listener, name):
     goal.target_pose.pose = marker.pose
 
     sac.send_goal(goal)
-    rad = markers[name][1]
-    if (rad > 0.001):
-        while True:
-            state = sac.get_state()
-            listener.waitForTransform('/base_link', '/map', rospy.Time(0), rospy.Duration(4.0))
-            (trans,rot) = listener.lookupTransform('/base_link', '/map', rospy.Time(0))
-            dest = get_distance(trans[0], trans[1], marker.pose.position.x, marker.pose.position.y)
-            if dest < rad:
-                sac.cancel_goal()
-                success = True
-                break
-            time.sleep(0.01)
+    #rad = markers[name][1]
+    # if (rad > 0.001):
+    #     while True:
+    #         state = sac.get_state()
+    #         listener.waitForTransform('/base_link', '/map', rospy.Time(0), rospy.Duration(4.0))
+    #         (trans,rot) = listener.lookupTransform('/base_link', '/map', rospy.Time(0))
+    #         dest = get_distance(trans[0], trans[1], marker.pose.position.x, marker.pose.position.y)
+    #         if dest < rad:
+    #             sac.cancel_goal()
+    #             success = True
+    #             break
+    #         time.sleep(0.01)
     success = sac.wait_for_result(rospy.Duration(60))
     print "move base " + str(success)
+    if not success:
+        sac.send_goal(goal)
+        success = sac.wait_for_result(rospy.Duration(60))
+        print "move base " + str(success)
+        # if not success:
+        #     return False
+        #     goal.target_pose.header.frame_id = 'map'
+        #     goal.target_pose.header.stamp = rospy.Time.now()
+        #     goal.target_pose.pose = markers['base'][0].pose
+        #     sac.send_goal(goal)
+        #     success = sac.wait_for_result(rospy.Duration(60))
+    return success
 
 # get distance
 def get_distance(x1, y1, x2, y2):
@@ -146,8 +158,12 @@ def dispatchJobs():
             location = jobQueue.get(True)
             print "doing job"
             time.sleep(15)
-            print "done"
-            #goto_marker(sac, listener, location)
+            #success = goto_marker(sac, listener, location) # dispatches robot for delivery
+            if not success:
+                print "snack delivery failed"
+            else:
+                print "snack delivery done"
+            success = goto_marker(sac, listener, 'base') # brings robot back to the base
 
 if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
