@@ -42,7 +42,6 @@ jobQueue = Queue()
 
 
 def connect_to_box():
-    global
     listen_socket = socket(AF_INET, SOCK_STREAM)
     listen_socket.bind(('0.0.0.0', BOX_PORT))
     Listen_socket.listen(5)
@@ -92,8 +91,8 @@ def goto_marker(sac, listener, name):
     success = sac.wait_for_result(rospy.Duration(0))    # CHANGE IT FROM 60 -> 0
     print "move base " + str(success)
     if not success:
-        clear_costmap = rospy.ServiceProxy('/move_base/clear_costmaps', std_srvs.srv.Empty)
-        clear_costmap()
+        #clear_costmap = rospy.ServiceProxy('/move_base/clear_costmaps', std_srvs.srv.Empty)
+        #clear_costmap()
         sac.send_goal(goal)
         success = sac.wait_for_result(rospy.Duration(0))    # SAME AS ABOVE (CHANGE)
         print "move base " + str(success)
@@ -108,6 +107,8 @@ def worker():
     listening_socket = socket(AF_INET, SOCK_STREAM)
     listening_socket.bind(('0.0.0.0', common.POLL_PORT))
     listening_socket.listen(5)
+    listening_socket.settimeout(None)
+    print listening_socket.gettimeout()
 
     try:
         while True:
@@ -146,16 +147,16 @@ def worker():
     except KeyboardInterrupt:
         exit()
 
-def dispatchJobs():
+def dispatchJobs(sac):
     global jobQueue, box_socket
-    connect_to_box()
+    #connect_to_box()
     while (1):
         if not jobQueue.empty():
             location, secret_code = jobQueue.get(True)
             print "doing job"
 
             packed_code = pack(ENCODE_CODE, secret_code)
-            box_socket.sendall(packed_code)
+            #box_socket.sendall(packed_code)
             success = goto_marker(sac, listener, location) # brings robot back to the base
             if not success:
                 print "snack delivery failed"
@@ -163,29 +164,28 @@ def dispatchJobs():
                 print "snack delivery done"
 
             if success:
-                recv_data = box_socket.recv(common.BUF_SIZE)
-                code = unpack(common.CODE_ENCODING, recv_data)
-                if code == 1:
-                    time.sleep(30)
-                    goto_marker(sac, listener, 'base')
+                #recv_data = box_socket.recv(common.BUF_SIZE)
+                #code = unpack(common.CODE_ENCODING, recv_data)
+                #if code == 1:
+                time.sleep(5)
+                goto_marker(sac, listener, 'base')
             else:
                 goto_marker(sac, listener, 'base')
 
 if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
 
-    if not TESTING:
-        rospy.init_node('navigator')
-        pub = rospy.Publisher('~cmd_vel', Twist, queue_size=5)
-        marker_publisher = rospy.Publisher('visualization_marker', Marker)
-        sac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-        sac.wait_for_server(rospy.Duration(5))
+    rospy.init_node('navigator')
+    pub = rospy.Publisher('~cmd_vel', Twist, queue_size=5)
+    marker_publisher = rospy.Publisher('visualization_marker', Marker)
+    sac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+    sac.wait_for_server(rospy.Duration(5))
 
-        listener = tf.TransformListener()
-        listener.waitForTransform('/base_link', '/map', rospy.Time(0), rospy.Duration(100000.0))
-        (trans,rot) = listener.lookupTransform('/base_link', '/map', rospy.Time(0))
+    listener = tf.TransformListener()
+    listener.waitForTransform('/base_link', '/map', rospy.Time(0), rospy.Duration(100000.0))
+    (trans,rot) = listener.lookupTransform('/base_link', '/map', rospy.Time(0))
 
-        read_markers()
+    read_markers()
 
     x = 0
     th = 0
@@ -197,7 +197,7 @@ if __name__=="__main__":
     control_speed = 0
     control_turn = 0
 
-    t = Thread(target=dispatchJobs, args=())
+    t = Thread(target=dispatchJobs, args=(sac,))
     t.daemon = True
     t.start()
     print "started dispatcher, lisening to job requests"
