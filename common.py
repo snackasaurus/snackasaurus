@@ -2,8 +2,10 @@ from struct import calcsize, pack
 
 # variables shared between the server and the poll
 POLL_PORT = 48101
+BOX_PORT = 48102
 BUF_SIZE = 4096
 CODE_NAME_LOC_NUM_ENCODING = '!I30s20sB'
+CODE_ENCODING = '!I'
 SNACK_ENCODING = '20sB'
 SNACK_SIZE = calcsize(SNACK_ENCODING)
 HEADER_SIZE = calcsize(CODE_NAME_LOC_NUM_ENCODING)

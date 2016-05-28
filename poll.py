@@ -5,7 +5,7 @@ import server
 import time
 from threading import Thread
 from socket import socket, AF_INET, SOCK_STREAM
-from struct import unpack, calcsize
+from struct import pack, unpack, calcsize
 import sys
 from Queue import Queue, Empty
 
@@ -21,6 +21,7 @@ from std_msgs.msg import Header, ColorRGBA
 import tf, actionlib
 from tf.transformations import euler_from_quaternion
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+import std_srvs.srv
 
 # python imports
 import sys, select, termios, tty, math, time, os, csv
@@ -34,7 +35,18 @@ turn = 1
 marker_id = 0
 markers = {}
 
+box_socket = None
+ENCODE_CODE = '!I'
+
 jobQueue = Queue()
+
+
+def connect_to_box():
+    global
+    listen_socket = socket(AF_INET, SOCK_STREAM)
+    listen_socket.bind(('0.0.0.0', BOX_PORT))
+    Listen_socket.listen(5)
+    box_socket, box_addr = listen_socket.accept()
 
 # read positions from file
 def read_markers():
@@ -77,31 +89,14 @@ def goto_marker(sac, listener, name):
     goal.target_pose.pose = marker.pose
 
     sac.send_goal(goal)
-    #rad = markers[name][1]
-    # if (rad > 0.001):
-    #     while True:
-    #         state = sac.get_state()
-    #         listener.waitForTransform('/base_link', '/map', rospy.Time(0), rospy.Duration(4.0))
-    #         (trans,rot) = listener.lookupTransform('/base_link', '/map', rospy.Time(0))
-    #         dest = get_distance(trans[0], trans[1], marker.pose.position.x, marker.pose.position.y)
-    #         if dest < rad:
-    #             sac.cancel_goal()
-    #             success = True
-    #             break
-    #         time.sleep(0.01)
-    success = sac.wait_for_result(rospy.Duration(60))
+    success = sac.wait_for_result(rospy.Duration(0))    # CHANGE IT FROM 60 -> 0
     print "move base " + str(success)
     if not success:
+        clear_costmap = rospy.ServiceProxy('/move_base/clear_costmaps', std_srvs.srv.Empty)
+        clear_costmap()
         sac.send_goal(goal)
-        success = sac.wait_for_result(rospy.Duration(60))
+        success = sac.wait_for_result(rospy.Duration(0))    # SAME AS ABOVE (CHANGE)
         print "move base " + str(success)
-        # if not success:
-        #     return False
-        #     goal.target_pose.header.frame_id = 'map'
-        #     goal.target_pose.header.stamp = rospy.Time.now()
-        #     goal.target_pose.pose = markers['base'][0].pose
-        #     sac.send_goal(goal)
-        #     success = sac.wait_for_result(rospy.Duration(60))
     return success
 
 # get distance
@@ -140,7 +135,7 @@ def worker():
                 snack_name = snack_name.replace('\0', '')
                 print '    [SNACK-DATA]  snack_name: %s, snack_amount: %d' % (snack_name, snack_amount)
 
-            jobQueue.put(location)
+            jobQueue.put((location, secret_code))
 
             #print "waiting for job"
             #server.get_job()
@@ -152,18 +147,29 @@ def worker():
         exit()
 
 def dispatchJobs():
-    global jobQueue
+    global jobQueue, box_socket
+    connect_to_box()
     while (1):
         if not jobQueue.empty():
-            location = jobQueue.get(True)
+            location, secret_code = jobQueue.get(True)
             print "doing job"
-            time.sleep(15)
-            #success = goto_marker(sac, listener, location) # dispatches robot for delivery
+
+            packed_code = pack(ENCODE_CODE, secret_code)
+            box_socket.sendall(packed_code)
+            success = goto_marker(sac, listener, location) # brings robot back to the base
             if not success:
                 print "snack delivery failed"
             else:
                 print "snack delivery done"
-            success = goto_marker(sac, listener, 'base') # brings robot back to the base
+
+            if success:
+                recv_data = box_socket.recv(common.BUF_SIZE)
+                code = unpack(common.CODE_ENCODING, recv_data)
+                if code == 1:
+                    time.sleep(30)
+                    goto_marker(sac, listener, 'base')
+            else:
+                goto_marker(sac, listener, 'base')
 
 if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
