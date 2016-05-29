@@ -3,12 +3,14 @@
 # Flask server, woo!
 #
 
-from flask import Flask, request, redirect, url_for, send_from_directory
+from flask import Flask, request, redirect, url_for, send_from_directory, jsonify
 from flask.ext.cors import CORS, cross_origin
 
 import common
+import uuid
+from threading import Thread, Lock
 from Queue import Queue
-from socket import socket, AF_INET, SOCK_STREAM
+from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
 from struct import pack
 import sys
 
@@ -17,7 +19,7 @@ sys.setdefaultencoding('utf-8')
 
 # Setup Flask app.
 app = Flask(__name__)
-app.debug = True
+app.debug = False
 cors = CORS(app, resources={r"/order": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 
@@ -37,8 +39,6 @@ class Job:
         self.name = str(name)
         self.location = str(location)
         self.code = code
-        self.poll_socket = socket(AF_INET, SOCK_STREAM)
-        self.poll_socket.connect(('localhost', common.POLL_PORT))
 
     def addSnack(self, snack_name, quantity):
         # add the snack IFF the quantity is at least one
@@ -48,7 +48,9 @@ class Job:
     def send_job(self):
         # send the job to the node
         encoded_data = self.encode_data()
-        self.poll_socket.sendall(encoded_data)
+        poll_socket = socket(AF_INET, SOCK_STREAM)
+        poll_socket.connect(('0.0.0.0', common.POLL_PORT))
+        poll_socket.sendall(encoded_data)
 
     def encode_data(self):
         # encode all of the data to send
@@ -66,16 +68,34 @@ class Job:
 def root():
   return app.send_static_file('index.html')
 
+qLock = Lock()
+localJobQueue = Queue()
+
 @app.route('/info')
 def info():
+    print "{called info}"
+
     return app.send_static_file('info.html')
 
 @app.route('/display')
 def display():
-    result = app.send_static_file('display.html')
-    #result.text.replace("(*name*)", "chris")
-    print str(result)
-    return result
+    tempJobs = []
+
+    d = dict() # a=23, b=42, c=[1, 2, 3]
+
+    i = 0
+    qLock.acquire()
+    while not localJobQueue.empty():
+        j = localJobQueue.get()
+        tempJobs.append(j)
+        d[i] = (j.name, j.location)
+        i += 1
+    for j in tempJobs:
+        localJobQueue.put(j)
+    qLock.release()
+    print tempJobs
+    
+    return jsonify(d)
 
 @app.route('/<path:path>')
 def static_proxy(path):
@@ -106,8 +126,31 @@ def login():
 
         # send the job to the poll
         job.send_job()
+        print "sent job to poll"
+        localJobQueue.put(job)
 
 	return "<b>" + name + "</b> " + location
 
+def getUpdates():
+    print "waiting for updates"
+    l_socket = socket(AF_INET, SOCK_STREAM)
+    l_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    l_socket.bind(('0.0.0.0', common.SERVICE_PORT))
+    l_socket.listen(5)
+
+    while True:
+        client_socket, client_addr = l_socket.accept()
+        recv_data = client_socket.recv(common.BUF_SIZE)
+        print "received " + str(recv_data) + " job done"
+        
+        qLock.acquire()
+        job = localJobQueue.get()
+        qLock.release()
+        print "code " + str(job.code)
+
 if __name__ == '__main__':
-  app.run(host="unimate.cs.washington.edu", port=int(59595))
+    t = Thread(target=getUpdates, args=())
+    t.daemon = True
+    t.start()
+
+    app.run(host="unimate.cs.washington.edu", port=int(59595))

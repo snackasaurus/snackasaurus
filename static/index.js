@@ -72,7 +72,7 @@ $( document ).ready(function() {
 
       var xhttp = new XMLHttpRequest();
       xhttp.open("GET", "http://unimate.cs.washington.edu:59595/order?name=" + name + "&location=" + loct + "&code=" + code + snacks_str, true);
-      xhttp.setRequestHeader("Access-Control-Allow-Origin", "http://unimate.cs.washington.edu:59595");
+      xhttp.setRequestHeader("Access-Control-Allow-Origin", "unimate.cs.washington.edu");
       xhttp.send();
       xhttp.onload = function(event)
       {

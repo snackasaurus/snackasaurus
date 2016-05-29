@@ -4,7 +4,7 @@ import common
 import server
 import time
 from threading import Thread
-from socket import socket, AF_INET, SOCK_STREAM
+from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
 from struct import pack, unpack, calcsize
 import sys
 from Queue import Queue, Empty
@@ -12,7 +12,10 @@ from Queue import Queue, Empty
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-# ros imports
+# flags
+TESTING = False
+
+ros imports
 import rospy
 from geometry_msgs.msg import Twist
 from visualization_msgs.msg import Marker
@@ -25,9 +28,6 @@ import std_srvs.srv
 
 # python imports
 import sys, select, termios, tty, math, time, os, csv
-
-# flags
-TESTING = True
 
 # global vars
 speed = .2
@@ -102,20 +102,20 @@ def goto_marker(sac, listener, name):
 def get_distance(x1, y1, x2, y2):
     return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
-
 def worker():
     listening_socket = socket(AF_INET, SOCK_STREAM)
+    listening_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     listening_socket.bind(('0.0.0.0', common.POLL_PORT))
     listening_socket.listen(5)
     listening_socket.settimeout(None)
-    print listening_socket.gettimeout()
 
     try:
         while True:
+            print "[GOOD NEWS] Waiting for data!"
             client_socket, client_addr = listening_socket.accept()
-            print '[GOOD NEWS] Data received!'
+            print '[GOOD NEWS] Data received!' + str(client_socket) + str(client_addr)
             recv_data = client_socket.recv(common.BUF_SIZE)
-
+            print '[GOOD NEWS] finished'
             # get the code, name, location, and number of snacks
             code_name_loc_num, rest_snacks = recv_data[:common.HEADER_SIZE], recv_data[common.HEADER_SIZE:]
             secret_code, name, location, num_snacks = unpack(common.CODE_NAME_LOC_NUM_ENCODING, code_name_loc_num)
@@ -127,7 +127,7 @@ def worker():
 
             print '  [DATA-RECEIVED]  secret_code: %d, name: %s, location:%s, num_snacks: %d' % \
                   (secret_code, name, location, num_snacks)
-
+            job = server.Job(name, location, secret_code)
             for i in range(0, num_snacks):
                 single_snack, rest_snacks = rest_snacks[:common.SNACK_SIZE], rest_snacks[common.SNACK_SIZE:]
                 snack_name, snack_amount = unpack(common.SNACK_ENCODING, single_snack)
@@ -135,15 +135,11 @@ def worker():
                 # strip out any nulls in the snack (same reason as the name/location one)
                 snack_name = snack_name.replace('\0', '')
                 print '    [SNACK-DATA]  snack_name: %s, snack_amount: %d' % (snack_name, snack_amount)
+                job.addSnack(snack_name, snack_amount)
 
-            jobQueue.put((location, secret_code))
+            jobQueue.put(job)
 
-            #print "waiting for job"
-            #server.get_job()
-            #print "got job"
-
-            #time.sleep(5)
-            #print "job was done"
+            print "job put on queue"
     except KeyboardInterrupt:
         exit()
 
@@ -152,40 +148,59 @@ def dispatchJobs(sac):
     #connect_to_box()
     while (1):
         if not jobQueue.empty():
-            location, secret_code = jobQueue.get(True)
+            job = jobQueue.get(True)
+            location = job.location
+            secret_code = job.code
             print "doing job"
 
-            packed_code = pack(ENCODE_CODE, secret_code)
-            #box_socket.sendall(packed_code)
-            success = goto_marker(sac, listener, location) # brings robot back to the base
-            if not success:
-                print "snack delivery failed"
+            if not TESTING:
+                packed_code = pack(ENCODE_CODE, secret_code)
+                #box_socket.sendall(packed_code)
+                success = goto_marker(sac, listener, location) # brings robot back to the base
+                if not success:
+                    print "snack delivery failed"
+                else:
+                    print "snack delivery done"
             else:
-                print "snack delivery done"
+                time.sleep(15)
+                success = True
+            
+            if not TESTING:
+                if success:
+                    #recv_data = box_socket.recv(common.BUF_SIZE)
+                    #code = unpack(common.CODE_ENCODING, recv_data)
+                    #if code == 1:
+                    time.sleep(5)
+                    goto_marker(sac, listener, 'base')
+                else:
+                    goto_marker(sac, listener, 'base')
 
-            if success:
-                #recv_data = box_socket.recv(common.BUF_SIZE)
-                #code = unpack(common.CODE_ENCODING, recv_data)
-                #if code == 1:
-                time.sleep(5)
-                goto_marker(sac, listener, 'base')
-            else:
-                goto_marker(sac, listener, 'base')
+            notifyServerDone(job)
+
+def notifyServerDone(job):
+    print "sending to server"
+    send_socket = socket(AF_INET, SOCK_STREAM)
+    send_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    send_socket.connect(('0.0.0.0', common.SERVICE_PORT))
+    
+    send_socket.sendall(str(job.code))
+    print "sent to server"
 
 if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
 
-    rospy.init_node('navigator')
-    pub = rospy.Publisher('~cmd_vel', Twist, queue_size=5)
-    marker_publisher = rospy.Publisher('visualization_marker', Marker)
-    sac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-    sac.wait_for_server(rospy.Duration(5))
+    if not TESTING:
+        rospy.init_node('navigator')
+        pub = rospy.Publisher('~cmd_vel', Twist, queue_size=5)
+        marker_publisher = rospy.Publisher('visualization_marker', Marker)
+        sac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+        sac.wait_for_server(rospy.Duration(5))
 
-    listener = tf.TransformListener()
-    listener.waitForTransform('/base_link', '/map', rospy.Time(0), rospy.Duration(100000.0))
-    (trans,rot) = listener.lookupTransform('/base_link', '/map', rospy.Time(0))
+        listener = tf.TransformListener()
+        listener.waitForTransform('/base_link', '/map', rospy.Time(0), rospy.Duration(100000.0))
+        (trans,rot) = listener.lookupTransform('/base_link', '/map', rospy.Time(0))
 
-    read_markers()
+        read_markers()
 
     x = 0
     th = 0
@@ -200,8 +215,12 @@ if __name__=="__main__":
     t = Thread(target=dispatchJobs, args=(sac,))
     t.daemon = True
     t.start()
-    print "started dispatcher, lisening to job requests"
+    # print "[STARTUP]: started dispatcher, lisening to job requests"
+    # t = Thread(target=service, args=())
+    # t.daemon = True
+    # t.start()
+    print "[STARTUP]: service ready"
+    print "[STARTUP]: ready to receive requests"
     worker()
-    print "ready to receive requests"
 
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)

@@ -3,6 +3,7 @@ from struct import calcsize, pack
 # variables shared between the server and the poll
 POLL_PORT = 48101
 BOX_PORT = 48102
+SERVICE_PORT = 54321
 BUF_SIZE = 4096
 CODE_NAME_LOC_NUM_ENCODING = '!I30s20sB'
 CODE_ENCODING = '!I'
