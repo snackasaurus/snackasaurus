@@ -15,7 +15,7 @@ sys.setdefaultencoding('utf-8')
 # flags
 TESTING = False
 
-ros imports
+# ros imports
 import rospy
 from geometry_msgs.msg import Twist
 from visualization_msgs.msg import Marker
@@ -36,16 +36,21 @@ marker_id = 0
 markers = {}
 
 box_socket = None
+box_connected = False
 ENCODE_CODE = '!I'
 
 jobQueue = Queue()
 
 
 def connect_to_box():
+    global box_socket
+
     listen_socket = socket(AF_INET, SOCK_STREAM)
     listen_socket.bind(('0.0.0.0', BOX_PORT))
     Listen_socket.listen(5)
+    listening_socket.settimeout(None)
     box_socket, box_addr = listen_socket.accept()
+    box_connected = True
 
 # read positions from file
 def read_markers():
@@ -144,45 +149,60 @@ def worker():
         exit()
 
 def dispatchJobs(sac):
-    global jobQueue, box_socket
-    #connect_to_box()
-    while (1):
-        if not jobQueue.empty():
-            job = jobQueue.get(True)
-            location = job.location
-            secret_code = job.code
-            print "doing job"
+    global jobQueue, box_socket, box_connected
 
-            if not TESTING:
-                packed_code = pack(ENCODE_CODE, secret_code)
-                #box_socket.sendall(packed_code)
-                success = goto_marker(sac, listener, location) # brings robot back to the base
-                if not success:
-                    print "snack delivery failed"
-                else:
-                    print "snack delivery done"
-            else:
-                time.sleep(15)
-                success = True
-            
-            if not TESTING:
-                if success:
-                    #recv_data = box_socket.recv(common.BUF_SIZE)
-                    #code = unpack(common.CODE_ENCODING, recv_data)
-                    #if code == 1:
-                    time.sleep(5)
-                    goto_marker(sac, listener, 'base')
-                else:
-                    goto_marker(sac, listener, 'base')
+    try:
+        while (1):
+            if not jobQueue.empty():
+                job = jobQueue.get(True)
+                location = job.location
+                secret_code = job.code
+                print "doing job"
 
-            notifyServerDone(job)
+                if not TESTING:
+                    packed_code = pack(ENCODE_CODE, secret_code)
+                    #box_socket.sendall(packed_code)
+                    #box_socket.close()
+                    box_connected = False
+
+                    # start a new thread to listen to a new connection from the both
+                    '''
+                    t = Thread(target=connect_to_box, args=())
+                    t.daemon = True
+                    t.start()
+                    '''
+
+                    success = goto_marker(sac, listener, location)
+                    if not success:
+                        print "snack delivery failed"
+                    else:
+                        print "snack delivery done"
+                else:
+                    time.sleep(15)
+                    success = True
+
+                if not TESTING:
+                    if success:
+                        #recv_data = box_socket.recv(common.BUF_SIZE)
+                        #code = unpack(common.CODE_ENCODING, recv_data)
+                        #if code == 1:
+                        while not box_connected:
+                            continue
+                        time.sleep(5)
+                        goto_marker(sac, listener, 'base')
+                    else:
+                        goto_marker(sac, listener, 'base')
+
+                notifyServerDone(job)
+    except KeyboardInterrupt:
+        exit()
 
 def notifyServerDone(job):
     print "sending to server"
     send_socket = socket(AF_INET, SOCK_STREAM)
     send_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     send_socket.connect(('0.0.0.0', common.SERVICE_PORT))
-    
+
     send_socket.sendall(str(job.code))
     print "sent to server"
 
@@ -211,6 +231,15 @@ if __name__=="__main__":
     target_turn = 0
     control_speed = 0
     control_turn = 0
+
+    # block until the box initially conencts to us
+    '''
+    listen_socket = socket(AF_INET, SOCK_STREAM)
+    listen_socket.bind(('0.0.0.0', common.BOX_PORT))
+    Listen_socket.listen(5)
+    box_socket, box_addr = listen_socket.accept()
+    box_connected = True
+    '''
 
     t = Thread(target=dispatchJobs, args=(sac,))
     t.daemon = True
